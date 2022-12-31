@@ -1,4 +1,4 @@
-# How to use HTTPS on localhost with PHP web server
+# How to use HTTPS on localhost
 
 This repository was created as a reference for my YouTube video on how to use an HTTPS connection to localhost with the PHP built-in web server. You can find the video here: https://www.youtube.com/watch?v=sDAX1uQzM8Y
 
