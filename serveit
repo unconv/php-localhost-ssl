@@ -33,7 +33,7 @@ php -S $1:$2 &
 sudo stunnel3 -f -d $3 -r $2 -p $CERT_FOLDER/$1-bundle.pem
 
 # remove domain from hosts
-sudo sed -i -e '/# added by serveit/,/127.0.0.1 mydomain.com/d' /etc/hosts
+sudo sed -i -e "/# added by serveit/,/127.0.0.1 $1/d" /etc/hosts
 
 # remove certificates
 rm -f $CERT_FOLDER/$1-bundle.pem $CERT_FOLDER/$1-key.pem $CERT_FOLDER/$1-cert.pem
