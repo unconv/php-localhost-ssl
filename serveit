@@ -1,0 +1,39 @@
+#!/bin/bash
+
+# SETTINGS
+MKCERT="mkcert" # path to mkcert binary
+CERT_FOLDER="$HOME/.serveit-certs" # path to certificate folder
+
+# check parameters
+[ $# -ne 3 ] && echo "usage: serveit <domain> <server port> <stunnel port>" && exit
+
+# check that mkcert binary is found
+[ ! -x $(which $MKCERT) ] && echo "mkcert binary not found" && exit
+
+# create certificate folder if it does not exist
+[ ! -d $CERT_FOLDER ] && mkdir $CERT_FOLDER
+[ ! -d $CERT_FOLDER ] && echo "Unable to create certificate folder" && exit
+
+# install certificate
+$MKCERT -key-file $CERT_FOLDER/$1-key.pem -cert-file $CERT_FOLDER/$1-cert.pem $1
+
+# create bundled certificate for stunnel
+cat $CERT_FOLDER/$1-key.pem $CERT_FOLDER/$1-cert.pem > $CERT_FOLDER/$1-bundle.pem
+
+# set permissions for certificates
+chmod 600 $CERT_FOLDER/$1-bundle.pem $CERT_FOLDER/$1-key.pem $CERT_FOLDER/$1-cert.pem
+
+# add domain to /etc/hosts
+sudo -E -- sh -c "echo '# added by serveit\n127.0.0.1 $1' >> /etc/hosts"
+
+# start PHP built in server
+php -S $1:$2 &
+
+# start stunnel
+sudo stunnel3 -f -d $3 -r $2 -p $CERT_FOLDER/$1-bundle.pem
+
+# remove domain from hosts
+sudo sed -i -e '/# added by serveit/,/127.0.0.1 mydomain.com/d' /etc/hosts
+
+# remove certificates
+rm -f $CERT_FOLDER/$1-bundle.pem $CERT_FOLDER/$1-key.pem $CERT_FOLDER/$1-cert.pem
