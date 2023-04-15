@@ -36,9 +36,12 @@ You can also use the `serveit` script I have created, to make a certificate for 
 
 For example:
 
-`serveit example.com 443 8080`
+`serveit example.com 8080 443`
 
-You can then acces https://example.com in your browser and it will point to the PHP built in server in the folder where you ran the `serveit` script
+You can then acces https://example.com in your browser and it will point to the PHP built in server in the folder where you ran the `serveit` script. Or user your local machine IP adress to enable HTTPS access for any device on your local network (smartphone or other):
+
+`serveit 192.168.1.10 8080 443`
+
 
 ## How to use it with WordPress
 
@@ -49,3 +52,13 @@ There's also the problem with WordPress that if you have originally created your
 You can fix both of these issues by adding the code in the `wp-config.php` file in this repository to your WordPress installation's `wp-config.php` file.
 
 You can also set the `$url` variable to `"https://".$_SERVER['HTTP_HOST]` if you want to allow access to your WordPress website with any domain.
+
+
+## Installing (mkcert) Root Certificate on other devices
+
+To get other devices to accept your local SSL certificate you need to install the Root CA certificate created by mkcert on your development sever on those devices:
+
+- link rootCA.pem to your brand new (non SSL) web server : `ln -s .local/share/mkcert/rootCA.pem rootCA.crt`  (notice voluntary extension change)
+- download it on your client device from http://192.168.1.10:8080/rootCA.crt  (or any domain/IP/port combination you used)
+- install that rootCA in your system/browser (eg [for Chrome on Android](https://android.stackexchange.com/a/240913))
+- access your (now secured) HTTPS website
