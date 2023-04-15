@@ -58,7 +58,9 @@ You can also set the `$url` variable to `"https://".$_SERVER['HTTP_HOST]` if you
 
 To get other devices to accept your local SSL certificate you need to install the Root CA certificate created by mkcert on your development sever on those devices:
 
-- link rootCA.pem to your brand new (non SSL) web server : `ln -s .local/share/mkcert/rootCA.pem rootCA.crt`  (notice voluntary extension change)
+- link rootCA.pem to be accessible via your brand new (non SSL) web server :
+
+        `ln -s .local/share/mkcert/rootCA.pem rootCA.crt`  (notice voluntary extension change)
 - download it on your client device from http://192.168.1.10:8080/rootCA.crt  (or any domain/IP/port combination you used)
-- install that rootCA in your system/browser (eg [for Chrome on Android](https://android.stackexchange.com/a/240913))
-- access your (now secured) HTTPS website
+- install that rootCA in your system/browser (eg [for Chrome on Android](https://android.stackexchange.com/a/240913), or [Firefox on Android](https://blog.jeroenhd.nl/article/firefox-for-android-using-a-custom-certificate-authority))
+- access your (now secured) HTTPS website : https://192.168.1.10/
