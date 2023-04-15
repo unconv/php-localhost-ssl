@@ -26,11 +26,11 @@ chmod 600 $CERT_FOLDER/$1-bundle.pem $CERT_FOLDER/$1-key.pem $CERT_FOLDER/$1-cer
 # add domain to /etc/hosts
 sudo -E -- sh -c "echo '# added by serveit\n127.0.0.1 $1' >> /etc/hosts"
 
-# start PHP built in server
-php -S localhost:$2 &
+# start PHP built in server, 0.0.0.0 listens to all local interfaces, not recommended on public server
+php -S 0.0.0.0:$2 &
 
 # start stunnel
-sudo stunnel3 -f -d $1:$3 -r localhost:$2 -p $CERT_FOLDER/$1-bundle.pem
+sudo stunnel3 -f -d $1:$3 -r $2 -p $CERT_FOLDER/$1-bundle.pem
 
 # remove domain from hosts
 sudo sed -i -e "/# added by serveit/,/127.0.0.1 $1/d" /etc/hosts
