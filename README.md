@@ -64,4 +64,4 @@ $ ln -s .local/share/mkcert/rootCA.pem rootCA.crt
 ```
 2. download it on your client device from http://192.168.1.10:8080/rootCA.crt (or any domain/IP/port combination you used)
 3. install that rootCA in your system/browser (see instructions for [Chrome on Android](https://android.stackexchange.com/a/240913), or [Firefox on Android](https://blog.jeroenhd.nl/article/firefox-for-android-using-a-custom-certificate-authority))
-4 access your (now secured) HTTPS website : https://192.168.1.10/
+to access your (now secured) HTTPS website : https://192.168.1.10/
