@@ -2,7 +2,7 @@
 
 # SETTINGS
 MKCERT="mkcert" # path to mkcert binary
-CERT_FOLDER="$HOME/.serveit-certs" # path to certificate folder
+CERT_FOLDER="/tmp" # path to certificate folder
 
 # check parameters
 [ $# -ne 3 ] && echo "usage: serveit <domain> <server port> <stunnel port>" && exit
@@ -51,6 +51,9 @@ cleanup() {
     echo ""
     echo "Removing /etc/hosts entry..."
     sudo sed -i -e "/# added by serveit/,/127.0.0.1 $1/d" /etc/hosts
+
+    echo "Removing certificate..."
+    rm -f $CERT_FOLDER/$1-bundle.pem $CERT_FOLDER/$1-key.pem $CERT_FOLDER/$1-cert.pem
 
     echo "Killing PHP and stunnel"
     sudo kill $(jobs -p)
