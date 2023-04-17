@@ -2,7 +2,7 @@
 
 # SETTINGS
 MKCERT="mkcert" # path to mkcert binary
-CERT_FOLDER="$HOME/.serveit-certs" # path to certificate folder
+CERT_FOLDER="/tmp" # path to certificate folder
 
 # check parameters
 [ $# -ne 3 ] && echo "usage: serveit <domain> <server port> <stunnel port>" && exit
@@ -14,8 +14,17 @@ CERT_FOLDER="$HOME/.serveit-certs" # path to certificate folder
 [ ! -d $CERT_FOLDER ] && mkdir $CERT_FOLDER
 [ ! -d $CERT_FOLDER ] && echo "Unable to create certificate folder" && exit
 
+# check if script was run as sudo
+if [ "$EUID" -ne 0 ]; then
+    echo "Please run this script with sudo"
+    exit 1
+fi
+
+# get current user
+username=$(logname)
+
 # install certificate
-$MKCERT -key-file $CERT_FOLDER/$1-key.pem -cert-file $CERT_FOLDER/$1-cert.pem $1
+sudo su - "$username" -c "$MKCERT -key-file $CERT_FOLDER/$1-key.pem -cert-file $CERT_FOLDER/$1-cert.pem $1"
 
 # create bundled certificate for stunnel
 cat $CERT_FOLDER/$1-key.pem $CERT_FOLDER/$1-cert.pem > $CERT_FOLDER/$1-bundle.pem
@@ -24,16 +33,37 @@ cat $CERT_FOLDER/$1-key.pem $CERT_FOLDER/$1-cert.pem > $CERT_FOLDER/$1-bundle.pe
 chmod 600 $CERT_FOLDER/$1-bundle.pem $CERT_FOLDER/$1-key.pem $CERT_FOLDER/$1-cert.pem
 
 # add domain to /etc/hosts
-sudo -E -- sh -c "echo '# added by serveit\n127.0.0.1 $1' >> /etc/hosts"
+echo "# added by serveit" >> /etc/hosts
+echo "127.0.0.1 $1" >> /etc/hosts
 
 # start PHP built in server, 0.0.0.0 listens to all local interfaces, not recommended on public server
 php -S 0.0.0.0:$2 &
 
 # start stunnel
-sudo stunnel3 -f -d $1:$3 -r $2 -p $CERT_FOLDER/$1-bundle.pem
+stunnel3 -f -d $1:$3 -r $2 -p $CERT_FOLDER/$1-bundle.pem &
 
-# remove domain from hosts
-sudo sed -i -e "/# added by serveit/,/127.0.0.1 $1/d" /etc/hosts
+sleep 1
+echo ""
+echo "## Your local SSL site is now available at https://$1:$3"
 
-# remove certificates
-rm -f $CERT_FOLDER/$1-bundle.pem $CERT_FOLDER/$1-key.pem $CERT_FOLDER/$1-cert.pem
+# function to stop both servers
+cleanup() {
+    echo ""
+    echo "Removing /etc/hosts entry..."
+    sudo sed -i -e "/# added by serveit/,/127.0.0.1 $1/d" /etc/hosts
+
+    echo "Removing certificate..."
+    rm -f $CERT_FOLDER/$1-bundle.pem $CERT_FOLDER/$1-key.pem $CERT_FOLDER/$1-cert.pem
+
+    echo "Killing PHP and stunnel"
+    sudo kill $(jobs -p)
+
+    echo ""
+    echo "Killed servers."
+}
+
+# trap Ctrl+C signal and call cleanup function
+trap cleanup INT
+
+# wait for both servers to finish
+wait
