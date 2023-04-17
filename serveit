@@ -36,8 +36,8 @@ chmod 600 $CERT_FOLDER/$1-bundle.pem $CERT_FOLDER/$1-key.pem $CERT_FOLDER/$1-cer
 echo "# added by serveit" >> /etc/hosts
 echo "127.0.0.1 $1" >> /etc/hosts
 
-# start PHP built in server, 0.0.0.0 listens to all local interfaces, not recommended on public server
-php -S 0.0.0.0:$2 &
+# start PHP built in server
+php -S localhost:$2 &
 
 # start stunnel
 stunnel3 -f -d $1:$3 -r $2 -p $CERT_FOLDER/$1-bundle.pem &
