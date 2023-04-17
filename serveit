@@ -40,7 +40,7 @@ echo "127.0.0.1 $1" >> /etc/hosts
 php -S $1:$2 &
 
 # start stunnel
-stunnel3 -f -d $3 -r $2 -p $CERT_FOLDER/$1-bundle.pem &
+stunnel3 -f -d $1:$3 -r $2 -p $CERT_FOLDER/$1-bundle.pem &
 
 sleep 1
 echo ""
