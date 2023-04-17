@@ -37,7 +37,7 @@ echo "# added by serveit" >> /etc/hosts
 echo "127.0.0.1 $1" >> /etc/hosts
 
 # start PHP built in server
-php -S $1:$2 &
+php -S localhost:$2 &
 
 # start stunnel
 stunnel3 -f -d $1:$3 -r $2 -p $CERT_FOLDER/$1-bundle.pem &
