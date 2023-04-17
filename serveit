@@ -14,8 +14,17 @@ CERT_FOLDER="$HOME/.serveit-certs" # path to certificate folder
 [ ! -d $CERT_FOLDER ] && mkdir $CERT_FOLDER
 [ ! -d $CERT_FOLDER ] && echo "Unable to create certificate folder" && exit
 
+# check if script was run as sudo
+if [ "$EUID" -ne 0 ]; then
+    echo "Please run this script with sudo"
+    exit 1
+fi
+
+# get current user
+username=$(logname)
+
 # install certificate
-$MKCERT -key-file $CERT_FOLDER/$1-key.pem -cert-file $CERT_FOLDER/$1-cert.pem $1
+sudo su - "$username" -c "$MKCERT -key-file $CERT_FOLDER/$1-key.pem -cert-file $CERT_FOLDER/$1-cert.pem $1"
 
 # create bundled certificate for stunnel
 cat $CERT_FOLDER/$1-key.pem $CERT_FOLDER/$1-cert.pem > $CERT_FOLDER/$1-bundle.pem
